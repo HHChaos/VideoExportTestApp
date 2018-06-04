@@ -1,0 +1,38 @@
+﻿<Page
+    x:Class="VideoExpertTestApp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:VideoExpertTestApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Grid.Row="0" Text="视频尺寸:" VerticalAlignment="Center" x:Uid="TextBlock_VideoResolution"/>
+        <TextBlock Grid.Column="0" Grid.Row="1" Text="文件名称:" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="导出位置:" VerticalAlignment="Center" x:Uid="TextBlock_ExportPath"/>
+        <Border Grid.Column="1" Grid.Row="0" Height="40" Margin="10" BorderBrush="#C8D0D9" Background="#F3F4F8" BorderThickness="1">
+            <ComboBox ItemsSource="{x:Bind SizeLinks}" BorderThickness="0" SelectedItem="{x:Bind SelectLink,Mode=TwoWay}" SelectedValuePath="Data" DisplayMemberPath="Label" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </Border>
+        <TextBox Grid.Column="1" Grid.Row="1" Height="40" Margin="10" Text="{x:Bind ExportFileName,Mode=TwoWay}" Padding="8" BorderThickness="1" BorderBrush="#C8D0D9" Background="#FFFFFF"/>
+        <Border Grid.Column="1" Grid.Row="2" Height="40" Margin="10" Padding="10,0" BorderBrush="#C8D0D9" BorderThickness="1" Background="#FFFFFF" Tapped="FolderPiker_Tapped">
+            <TextBlock Text="{x:Bind ExportFolder.Path,Mode=OneWay}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        </Border>
+        <ProgressBar Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Value="{x:Bind Progress,Mode=OneWay}" Margin="20,50,20,10" Height="10" Minimum="0" Maximum="100" Foreground="#647991"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <Button x:Name="CancelBtn" Content="取消" Click="CancelBtn_Click" />
+            <Button Content="导出" Click="ExportButton_OnClick"/>
+        </StackPanel>
+    </Grid>
+</Page>
