@@ -35,28 +35,20 @@ namespace VideoExpertTestApp
         public StorageFolder DestinationFolder { get; }
         public string FileName { get; }
         public int Progress { get; private set; }
+        public Size ExportSize { get; private set; }
         public IList<BackgroundAudioTrack> BackgroundAudioTracks { get; } = new List<BackgroundAudioTrack>();
         public bool Canceled => _cancellationTokenSource.IsCancellationRequested;
 
-        public static readonly Dictionary<VideoEncodingQuality, Size> EncodingMap =
-            new Dictionary<VideoEncodingQuality, Size>
-            {
-                {VideoEncodingQuality.Vga, new Size(640f, 480f)},
-                {VideoEncodingQuality.Wvga, new Size(768f, 480f)},
-                {VideoEncodingQuality.Qvga, new Size(320f, 240f)},
-                {VideoEncodingQuality.HD720p, new Size(1280f, 720f)},
-                {VideoEncodingQuality.HD1080p, new Size(1920f, 1080f)},
-            };
 
-
-        public VideoExportTask(StorageFolder destinationFolder, string fileName, VideoEncodingQuality quality)
+        public VideoExportTask(StorageFolder destinationFolder, string fileName, Size exportSize)
         {
             DestinationFolder = destinationFolder;
             FileName = fileName;
+            ExportSize = exportSize;
             _context = SynchronizationContext.Current;
             _cancellationTokenSource = new CancellationTokenSource();
-            var obj = new Tuple<StorageFolder, object, string, VideoEncodingQuality>(DestinationFolder, null, fileName,
-                quality);
+            var obj = new Tuple<StorageFolder, object, string, Size>(DestinationFolder, null, fileName,
+                ExportSize);
             _exportTask = CreateExportTask(obj, _cancellationTokenSource.Token);
             _cancellationTokenSource.Token.Register(ClearCacheAsync);
         }
@@ -100,20 +92,26 @@ namespace VideoExpertTestApp
         {
             return new Task(() =>
             {
-                var para = obj as Tuple<StorageFolder, object, string, VideoEncodingQuality>;
+                var para = obj as Tuple<StorageFolder, object, string, Size>;
                 var folder = para?.Item1;
                 var player = para?.Item2;
                 var fileName = para?.Item3;
-                var quality = para?.Item4;
+                var mediaEncodingProfile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.HD720p);
                 if (para == null ||
                     folder == null ||
-                    string.IsNullOrEmpty(fileName))
+                    //player == null ||
+                    string.IsNullOrEmpty(fileName) ||
+                    Math.Abs(para.Item4.Width) < 1 ||
+                    Math.Abs(para.Item4.Height) < 1 ||
+                    mediaEncodingProfile?.Video == null)
                 {
                     UpdateExportStatus(false);
                     return;
                 }
+                var exportSize = para.Item4;
+                mediaEncodingProfile.Video.Width = (uint) exportSize.Width;
+                mediaEncodingProfile.Video.Height = (uint) exportSize.Height;
                 var cacheFolder = GetCacheFolder().GetAwaiter().GetResult();
-                var exportSize = EncodingMap[quality.Value];
                 var device = CanvasDevice.GetSharedDevice();
                 long total = 10000;
                 int fps = 25;
@@ -127,7 +125,7 @@ namespace VideoExpertTestApp
                     new CanvasRenderTarget(device, (float) exportSize.Width, (float) exportSize.Height, 96f);
                 using (var session = backgroud.CreateDrawingSession())
                 {
-                    session.Clear(Colors.Gray);
+                    session.Clear(Colors.White);
                 }
 
                 for (int s = 0; s <= total; s += loopGap)
@@ -154,7 +152,7 @@ namespace VideoExpertTestApp
                                 $"part_{mediafileList.Count}.mp4", CreationCollisionOption.ReplaceExisting).GetAwaiter()
                             .GetResult();
                         composition.RenderToFileAsync(mediaPartFile, MediaTrimmingPreference.Fast,
-                            MediaEncodingProfile.CreateMp4(quality.Value)).GetAwaiter().GetResult();
+                            mediaEncodingProfile).GetAwaiter().GetResult();
                         mediafileList.Add(mediaPartFile);
                         layerTmp = new MediaOverlayLayer();
                         foreach (var item in tmpFrameImgs)
@@ -183,7 +181,7 @@ namespace VideoExpertTestApp
                     .GetAwaiter().GetResult();
                 if (Canceled) return;
                 var saveOperation = mediaComposition.RenderToFileAsync(exportFile, MediaTrimmingPreference.Fast,
-                    MediaEncodingProfile.CreateMp4(quality.Value));
+                    mediaEncodingProfile);
                 saveOperation.Progress = (info, progress) =>
                 {
                     UpdateProgress((int) (50 + progress * 0.5));

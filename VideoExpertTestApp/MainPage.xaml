@@ -22,8 +22,13 @@
         <TextBlock Grid.Column="0" Grid.Row="0" Text="视频尺寸:" VerticalAlignment="Center" x:Uid="TextBlock_VideoResolution"/>
         <TextBlock Grid.Column="0" Grid.Row="1" Text="文件名称:" VerticalAlignment="Center"/>
         <TextBlock Grid.Column="0" Grid.Row="2" Text="导出位置:" VerticalAlignment="Center" x:Uid="TextBlock_ExportPath"/>
-        <Border Grid.Column="1" Grid.Row="0" Height="40" Margin="10" BorderBrush="#C8D0D9" Background="#F3F4F8" BorderThickness="1">
-            <ComboBox ItemsSource="{x:Bind SizeLinks}" BorderThickness="0" SelectedItem="{x:Bind SelectLink,Mode=TwoWay}" SelectedValuePath="Data" DisplayMemberPath="Label" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        <Border Grid.Column="1" Grid.Row="0" Margin="10" BorderBrush="#C8D0D9">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="50,0">
+                <TextBlock Text="Width:" VerticalAlignment="Center"/>
+                <TextBox Text="{x:Bind Width,Mode=TwoWay}" Margin="20,0"/>
+                <TextBlock Text="Height:" VerticalAlignment="Center"/>
+                <TextBox Text="{x:Bind Height,Mode=TwoWay}" Margin="20,0"/>
+            </StackPanel>
         </Border>
         <TextBox Grid.Column="1" Grid.Row="1" Height="40" Margin="10" Text="{x:Bind ExportFileName,Mode=TwoWay}" Padding="8" BorderThickness="1" BorderBrush="#C8D0D9" Background="#FFFFFF"/>
         <Border Grid.Column="1" Grid.Row="2" Height="40" Margin="10" Padding="10,0" BorderBrush="#C8D0D9" BorderThickness="1" Background="#FFFFFF" Tapped="FolderPiker_Tapped">

@@ -41,15 +41,6 @@ namespace VideoExpertTestApp
         {
             this.InitializeComponent();
         }
-
-        public ObservableCollection<VideoQuality> SizeLinks = new ObservableCollection<VideoQuality>()
-        {
-            new VideoQuality() {Label = "1920 x 1080", Quality = VideoEncodingQuality.HD1080p},
-            new VideoQuality() {Label = "1280 x 720", Quality = VideoEncodingQuality.HD720p},
-            new VideoQuality() {Label = "768 x 480", Quality = VideoEncodingQuality.Wvga},
-            new VideoQuality() {Label = "640 x 480", Quality = VideoEncodingQuality.Vga},
-            new VideoQuality() {Label = "320 x 240", Quality = VideoEncodingQuality.Qvga},
-        };
         private double _progress;
 
         public double Progress
@@ -59,6 +50,28 @@ namespace VideoExpertTestApp
             {
                 _progress = value;
                 OnPropertyChanged(nameof(Progress));
+            }
+        }
+        private double _width=1280;
+
+        public double Width
+        {
+            get { return _width; }
+            set
+            {
+                _width = value;
+                OnPropertyChanged(nameof(Width));
+            }
+        }
+        private double _height=720;
+
+        public double Height
+        {
+            get { return _height; }
+            set
+            {
+                _height = value;
+                OnPropertyChanged(nameof(Height));
             }
         }
         private StorageFolder _exportFolder;
@@ -87,20 +100,6 @@ namespace VideoExpertTestApp
                 }
             }
         }
-        private VideoQuality _selectLink;
-
-        public VideoQuality SelectLink
-        {
-            get { return _selectLink; }
-            set
-            {
-                if (_selectLink != value)
-                {
-                    _selectLink = value;
-                    OnPropertyChanged(nameof(SelectLink));
-                }
-            }
-        }
         private async void FolderPiker_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             var picker = new FolderPicker();
@@ -120,7 +119,7 @@ namespace VideoExpertTestApp
             var musicFile = await folder.GetFileAsync(@"萧煌奇 - 末班车.mp3");
             var backgroundTrack = await BackgroundAudioTrack.CreateFromFileAsync(musicFile);
 
-            _task = new VideoExportTask(ExportFolder, ExportFileName, SelectLink.Quality);
+            _task = new VideoExportTask(ExportFolder, ExportFileName, new Size(_width, _height));
             _task.BackgroundAudioTracks.Add(backgroundTrack);
             _task.ExportProgressChanged += Task_ExportProgressChanged;
             _task.Start();
